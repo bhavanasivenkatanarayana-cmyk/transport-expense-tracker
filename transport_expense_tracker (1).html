@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Transport Expense Tracker</title>
+    <style>
+        :root {
+            --color-Green-50: rgba(252, 252, 249, 1);
+            --color-Green-100: rgba(255, 255, 253, 1);
+            --color-Red-200: rgba(245, 245, 245, 1);
+            --color-Red-300: rgba(167, 169, 169, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-background: var(--color-Green-50);
+            --color-surface: var(--color-Green-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-btn-primary-text: #ffffff;
+            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-success: var(--color-teal-500);
+            --color-error: var(--color-red-500);
+            --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --radius-base: 8px;
+            --radius-lg: 12px;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: #e6e6e6;
+                --color-text-secondary: rgba(167,169,169,0.7);
+                --color-primary: var(--color-teal-300);
+                --color-primary-hover: var(--color-teal-400);
+                --color-border: rgba(119,124,124,0.3);
+                --color-card-border: rgba(119,124,124,0.15);
+                --color-btn-primary-text: var(--color-slate-900);
+                --color-success: var(--color-teal-300);
+                --color-error: var(--color-red-400);
+            }
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:var(--font-family-base); background:var(--color-background); color:var(--color-text); line-height:1.6; }
+        .container { max-width:1400px; margin:0 auto; padding:var(--space-24); }
+        header { margin-bottom:var(--space-24); }
+        h1 { font-size:28px; font-weight:600; margin-bottom:var(--space-8); }
+        .dashboard-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:var(--space-16); margin-bottom:var(--space-16); align-items:start; }
+        .stat-card { background:var(--color-surface); border:1px solid var(--color-card-border); border-radius:var(--radius-lg); padding:var(--space-16); }
+        .stat-label { font-size:13px; color:var(--color-text-secondary); margin-bottom:var(--space-8); }
+        .stat-value { font-size:28px; font-weight:700; color:var(--color-text); }
+        .tabs { display:flex; gap:var(--space-8); margin-bottom:var(--space-16); border-bottom:1px solid var(--color-border); }
+        .tab { padding:var(--space-12) var(--space-20); background:none; border:none; border-bottom:2px solid transparent; color:var(--color-text-secondary); cursor:pointer; font-size:15px; font-weight:500; }
+        .tab.active { color:var(--color-primary); border-bottom-color:var(--color-primary); }
+        .tab-content { display:none; margin-bottom:var(--space-16); }
+        .tab-content.active { display:block; }
+        .form-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:var(--space-12); margin-bottom:var(--space-12); }
+        .form-group { display:flex; flex-direction:column; }
+        label { font-size:13px; font-weight:600; margin-bottom:6px; color:var(--color-text); }
+        input, select, textarea { padding:var(--space-10); border:1px solid var(--color-border); border-radius:var(--radius-base); background:var(--color-surface); color:var(--color-text); font-size:14px; }
+        input:focus, select:focus, textarea:focus { outline:2px solid var(--color-primary); border-color:var(--color-primary); }
+        .btn { padding:8px 14px; border:none; border-radius:var(--radius-base); font-size:14px; font-weight:600; cursor:pointer; }
+        .btn-primary { background:var(--color-primary); color:var(--color-btn-primary-text); }
+        .btn-secondary { background:transparent; border:1px solid var(--color-border); color:var(--color-text); }
+        .search-filter { display:flex; gap:var(--space-12); margin-bottom:var(--space-12); flex-wrap:wrap; align-items:center; }
+        .search-filter input, .search-filter select { min-width:180px; flex:1; }
+        .table-container { overflow-x:auto; background:var(--color-surface); border:1px solid var(--color-card-border); border-radius:var(--radius-lg); }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        th, td { padding:12px; text-align:left; border-bottom:1px solid var(--color-border); }
+        th { background:rgba(94,82,64,0.05); font-weight:700; position:sticky; top:0; }
+        tr:hover { background:rgba(33,128,141,0.03); }
+        .status-badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+        .status-paid { background:rgba(33,128,141,0.12); color:var(--color-success); }
+        .status-pending { background:rgba(94,82,64,0.12); color:var(--color-text-secondary); }
+        .actions { display:flex; gap:8px; }
+        .btn-small { padding:6px 10px; font-size:12px; }
+        .btn-delete { background:var(--color-error); color:#fff; border:none; border-radius:8px; }
+        .alert { padding:12px; border-radius:8px; margin-bottom:12px; display:none; }
+        .alert.success { background:rgba(33,128,141,0.08); border:1px solid rgba(33,128,141,0.18); color:var(--color-success); }
+        .charts-row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+        .chart-card { background:var(--color-surface); border:1px solid var(--color-card-border); border-radius:12px; padding:12px; width:100%; max-width:480px; }
+        @media (min-width:900px) {
+            .chart-card { width:48%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Transport Expense Tracker</h1>
+            <p style="color:var(--color-text-secondary);">Q1 Logistics Activity 2025-2026</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Amount</div>
+                <div class="stat-value">₹<span id="totalAmount">0.00</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Paid Amount</div>
+                <div class="stat-value" style="color:var(--color-success);">₹<span id="paidAmount">0.00</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending Amount</div>
+                <div class="stat-value" style="color:var(--color-error);">₹<span id="pendingAmount">0.00</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-value"><span id="totalTransactions">0</span></div>
+            </div>
+        </div>
+
+        <div class="charts-row" id="chartsRow">
+            <div class="chart-card">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        <div class="tabs" style="margin-top:16px;">
+            <button class="tab active" onclick="switchTab('transactions')">All Transactions</button>
+            <button class="tab" onclick="switchTab('add')">Add Transaction</button>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <div id="add-tab" class="tab-content">
+            <form id="transactionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="date">Date *</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="requestedPerson">Requested Person *</label>
+                        <input type="text" id="requestedPerson" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department *</label>
+                        <select id="department" required>
+                            <option value="">Select Department</option>
+                            <option value="CS Team">CS Team</option>
+                            <option value="Production">Production</option>
+                            <option value="Purchase">Purchase</option>
+                            <option value="HR">HR</option>
+                            <option value="Farm Monitoring">Farm Monitoring</option>
+                            <option value="R&D">R&D</option>
+                            <option value="IT Help Desk">IT Help Desk</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Mechanic">Mechanic</option>
+                            <option value="QC">QC</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="division">Division *</label>
+                        <select id="division" required>
+                            <option value="">Select Division</option>
+                            <option value="AQUA">AQUA</option>
+                            <option value="INFI">INFI</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pickupLocation">Pickup Location *</label>
+                        <input type="text" id="pickupLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryLocation">Delivery Location *</label>
+                        <input type="text" id="deliveryLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="material">Material *</label>
+                        <input type="text" id="material" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiverName">Receiver Name</label>
+                        <input type="text" id="receiverName">
+                    </div>
+                    <div class="form-group">
+                        <label for="lrNo">LR NO</label>
+                        <input type="text" id="lrNo">
+                    </div>
+                    <div class="form-group">
+                        <label for="dcWay">DC-WAY</label>
+                        <input type="text" id="dcWay">
+                    </div>
+                    <div class="form-group">
+                        <label for="dcNo">DC NO/INVOICE</label>
+                        <input type="text" id="dcNo">
+                    </div>
+                    <div class="form-group">
+                        <label for="noBoxes">No. of Boxes</label>
+                        <input type="number" id="noBoxes" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="transportName">Transport Name *</label>
+                        <input type="text" id="transportName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="purpose">Purpose *</label>
+                        <select id="purpose" required>
+                            <option value="">Select Purpose</option>
+                            <option value="Recovery">Recovery</option>
+                            <option value="Hub Moments">Hub Moments</option>
+                            <option value="Farming & Technical">Farming & Technical</option>
+                            <option value="IT Help Desk">IT Help Desk</option>
+                            <option value="Service">Service</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Purchase">Purchase</option>
+                            <option value="Production">Production</option>
+                            <option value="Internal">Internal</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="R&D">R&D</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modeOfPayment">Mode of Payment</label>
+                        <select id="modeOfPayment">
+                            <option value="N/A">N/A</option>
+                            <option value="Pay Through Imprest Amount">Pay Through Imprest Amount</option>
+                            <option value="Need To Pay">Need To Pay</option>
+                            <option value="Customer Pay">Customer Pay</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="materialStatus">Material Status</label>
+                        <select id="materialStatus">
+                            <option value="Delivered">Delivered</option>
+                            <option value="Handover">Handover</option>
+                            <option value="In Transit">In Transit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Payment Status</label>
+                        <select id="status">
+                            <option value="N/A">N/A</option>
+                            <option value="PAID">PAID</option>
+                            <option value="PENDING">PENDING</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentDate">Payment Date</label>
+                        <input type="date" id="paymentDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="wayBillNum">Way Bill Number</label>
+                        <input type="text" id="wayBillNum">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label for="remarks">Remarks</label>
+                        <textarea id="remarks" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:12px; margin-top:8px;">
+                    <button type="submit" class="btn btn-primary">Add Transaction</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                    <button type="button" class="btn btn-secondary" onclick="exportToCSV()">Export CSV</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearAllData()" style="margin-left:auto;">Clear All Data</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="transactions-tab" class="tab-content active">
+            <div class="search-filter">
+                <input type="text" id="searchInput" placeholder="Search by person, location, material...">
+                <select id="filterDepartment">
+                    <option value="">All Departments</option>
+                    <option value="CS Team">CS Team</option>
+                    <option value="Production">Production</option>
+                    <option value="Purchase">Purchase</option>
+                    <option value="HR">HR</option>
+                    <option value="Farm Monitoring">Farm Monitoring</option>
+                    <option value="R&D">R&D</option>
+                    <option value="IT Help Desk">IT Help Desk</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Mechanic">Mechanic</option>
+                    <option value="QC">QC</option>
+                </select>
+                <select id="filterStatus">
+                    <option value="">All Status</option>
+                    <option value="PAID">PAID</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="N/A">N/A</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Date</th>
+                            <th>Person</th>
+                            <th>Department</th>
+                            <th>Division</th>
+                            <th>Pickup</th>
+                            <th>Delivery</th>
+                            <th>Material</th>
+                            <th>Transport</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTable">
+                        <tr>
+                            <td colspan="12" style="text-align:center; padding:20px; color:var(--color-text-secondary);">
+                                No transactions yet. Add your first transaction to get started.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        let transactions = [];
+        let editingId = null;
+        let pieChart = null;
+        let barChart = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTransactions();
+            updateDashboard();
+            renderTransactions();
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            if (tab === 'transactions') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('transactions-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('add-tab').classList.add('active');
+            }
+        }
+
+        document.getElementById('transactionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const transaction = {
+                id: editingId || Date.now(),
+                date: document.getElementById('date').value,
+                requestedPerson: document.getElementById('requestedPerson').value.trim(),
+                department: document.getElementById('department').value,
+                division: document.getElementById('division').value,
+                pickupLocation: document.getElementById('pickupLocation').value.trim(),
+                deliveryLocation: document.getElementById('deliveryLocation').value.trim(),
+                material: document.getElementById('material').value.trim(),
+                receiverName: document.getElementById('receiverName').value.trim(),
+                lrNo: document.getElementById('lrNo').value.trim(),
+                dcWay: document.getElementById('dcWay').value.trim(),
+                dcNo: document.getElementById('dcNo').value.trim(),
+                noBoxes: document.getElementById('noBoxes').value,
+                transportName: document.getElementById('transportName').value.trim(),
+                purpose: document.getElementById('purpose').value,
+                modeOfPayment: document.getElementById('modeOfPayment').value,
+                amount: parseFloat(document.getElementById('amount').value) || 0,
+                materialStatus: document.getElementById('materialStatus').value,
+                status: document.getElementById('status').value,
+                paymentDate: document.getElementById('paymentDate').value,
+                wayBillNum: document.getElementById('wayBillNum').value.trim(),
+                remarks: document.getElementById('remarks').value.trim()
+            };
+
+            if (editingId) {
+                const index = transactions.findIndex(t => t.id === editingId);
+                transactions[index] = transaction;
+                showAlert('Transaction updated successfully!');
+                editingId = null;
+            } else {
+                transactions.push(transaction);
+                showAlert('Transaction added successfully!');
+            }
+
+            saveTransactions();
+            resetForm();
+            updateDashboard();
+            renderTransactions();
+            switchTab('transactions');
+        });
+
+        function resetForm() {
+            document.getElementById('transactionForm').reset();
+            editingId = null;
+        }
+
+        function updateDashboard() {
+            let totalAmount = 0, paidAmount = 0, pendingAmount = 0;
+            transactions.forEach(t => {
+                if (t.amount && t.amount > 0) {
+                    totalAmount += t.amount;
+                    if (t.status === 'PAID') paidAmount += t.amount;
+                    else if (t.status === 'PENDING') pendingAmount += t.amount;
+                }
+            });
+
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+            document.getElementById('paidAmount').textContent = paidAmount.toFixed(2);
+            document.getElementById('pendingAmount').textContent = pendingAmount.toFixed(2);
+            document.getElementById('totalTransactions').textContent = transactions.length;
+
+            renderPieChart(paidAmount, pendingAmount);
+            renderBarChart();
+        }
+
+        function renderPieChart(paid, pending) {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Paid', 'Pending'],
+                    datasets: [{
+                        data: [paid, pending],
+                        backgroundColor: ['rgba(76,175,80,0.9)', 'rgba(255,193,7,0.9)'],
+                        borderColor: ['rgba(76,175,80,1)', 'rgba(255,193,7,1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: { display:true, text:'Payment Status (₹)', padding:8 },
+                        legend: { position:'bottom' }
+                    }
+                }
+            });
+        }
+
+        function renderBarChart() {
+            // aggregate totals month-wise (based on transaction.date)
+            const monthly = {}; // key: YYYY-MM, value: total amount
+            transactions.forEach(t => {
+                if (!t.date) return;
+                const d = new Date(t.date);
+                if (isNaN(d)) return;
+                const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+                monthly[key] = (monthly[key] || 0) + (t.amount || 0);
+            });
+
+            // take last 12 months sorted
+            const months = [];
+            const amounts = [];
+            const now = new Date();
+            for (let i = 11; i >= 0; i--) {
+                const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const key = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
+                const label = dt.toLocaleString('en-IN', { month:'short', year:'2-digit' });
+                months.push(label);
+                amounts.push(parseFloat((monthly[key] || 0).toFixed(2)));
+            }
+
+            const ctx = document.getElementById('barChart').getContext('2d');
+            if (barChart) barChart.destroy();
+            barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Monthly Total (₹)',
+                        data: amounts,
+                        borderWidth: 1,
+                        backgroundColor: 'rgba(33,128,141,0.9)'
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: { display:true, text:'Last 12 Months - Total Transport Amount' },
+                        legend: { display:false }
+                    },
+                    scales: {
+                        y: { beginAtZero:true }
+                    }
+                }
+            });
+        }
+
+        function renderTransactions() {
+            const tbody = document.getElementById('transactionsTable');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterDept = document.getElementById('filterDepartment').value;
+            const filterStat = document.getElementById('filterStatus').value;
+
+            let filtered = transactions.filter(t => {
+                const matchSearch = !searchTerm ||
+                    (t.requestedPerson || '').toLowerCase().includes(searchTerm) ||
+                    (t.pickupLocation || '').toLowerCase().includes(searchTerm) ||
+                    (t.deliveryLocation || '').toLowerCase().includes(searchTerm) ||
+                    (t.material || '').toLowerCase().includes(searchTerm);
+                const matchDept = !filterDept || t.department === filterDept;
+                const matchStatus = !filterStat || t.status === filterStat;
+                return matchSearch && matchDept && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:20px; color:var(--color-text-secondary);">No transactions found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((t, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${t.date ? new Date(t.date).toLocaleDateString('en-IN') : ''}</td>
+                    <td>${escapeHtml(t.requestedPerson)}</td>
+                    <td>${escapeHtml(t.department)}</td>
+                    <td>${escapeHtml(t.division)}</td>
+                    <td>${escapeHtml(t.pickupLocation)}</td>
+                    <td>${escapeHtml(t.deliveryLocation)}</td>
+                    <td>${escapeHtml(t.material)}</td>
+                    <td>${escapeHtml(t.transportName)}</td>
+                    <td>₹${(t.amount || 0).toFixed(2)}</td>
+                    <td><span class="status-badge ${t.status === 'PAID' ? 'status-paid' : 'status-pending'}">${escapeHtml(t.status)}</span></td>
+                    <td class="actions">
+                        <button class="btn btn-secondary btn-small" onclick="editTransaction(${t.id})">Edit</button>
+                        <button class="btn btn-delete btn-small" onclick="deleteTransaction(${t.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editTransaction(id) {
+            const transaction = transactions.find(t => t.id === id);
+            if (!transaction) return;
+            editingId = id;
+            for (const key in transaction) {
+                const el = document.getElementById(key);
+                if (el) el.value = transaction[key];
+            }
+            switchTab('add');
+        }
+
+        function deleteTransaction(id) {
+            if (!confirm('Are you sure you want to delete this transaction?')) return;
+            transactions = transactions.filter(t => t.id !== id);
+            saveTransactions();
+            updateDashboard();
+            renderTransactions();
+            showAlert('Transaction deleted successfully!');
+        }
+
+        function saveTransactions() {
+            localStorage.setItem('transportTransactions', JSON.stringify(transactions));
+        }
+
+        function loadTransactions() {
+            const stored = localStorage.getItem('transportTransactions');
+            if (stored) {
+                try { transactions = JSON.parse(stored) || []; } catch(e) { transactions = []; }
+            } else transactions = [];
+        }
+
+        function showAlert(message) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = 'alert success';
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 3000);
+        }
+
+        function exportToCSV() {
+            if (transactions.length === 0) { alert('No transactions to export!'); return; }
+            const headers = ['S.No','Date','Requested Person','Department','Division','Pickup Location','Delivery Location','Material','Receiver Name','LR NO','DC-WAY','DC NO/INVOICE','No-Boxes','Transport Name','Purpose','Mode Of Payment','Amount','Material Status','Status','Payment Date','Way Bill Num','Remarks'];
+            const rows = transactions.map((t, idx) => [
+                idx+1,
+                t.date || '',
+                t.requestedPerson || '',
+                t.department || '',
+                t.division || '',
+                t.pickupLocation || '',
+                t.deliveryLocation || '',
+                t.material || '',
+                t.receiverName || '',
+                t.lrNo || '',
+                t.dcWay || '',
+                t.dcNo || '',
+                t.noBoxes || '',
+                t.transportName || '',
+                t.purpose || '',
+                t.modeOfPayment || '',
+                (t.amount || 0).toFixed(2),
+                t.materialStatus || '',
+                t.status || '',
+                t.paymentDate || '',
+                t.wayBillNum || '',
+                t.remarks || ''
+            ]);
+            let csv = headers.join(',') + '\\n';
+            rows.forEach(r => { csv += r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',') + '\\n'; });
+            const blob = new Blob([csv], { type:'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transport_expenses_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (!confirm('This will permanently delete ALL transactions. Proceed?')) return;
+            transactions = [];
+            saveTransactions();
+            updateDashboard();
+            renderTransactions();
+            showAlert('All data cleared.');
+        }
+
+        // helpers
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // filters & search
+        document.getElementById('searchInput').addEventListener('input', renderTransactions);
+        document.getElementById('filterDepartment').addEventListener('change', renderTransactions);
+        document.getElementById('filterStatus').addEventListener('change', renderTransactions);
+    </script>
+</body>
+</html>
